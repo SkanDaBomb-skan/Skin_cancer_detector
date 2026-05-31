@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="DermaVision AI — Advanced skin lesion analysis powered by deep learning. Upload dermoscopy images for instant AI-assisted classification.">
+    <title>{% block title %}DermaVision AI{% endblock %}</title>
+
+    <!-- Google Fonts — Inter for clean medical UI -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Lucide Icons (lightweight SVG icon set) -->
+    <script src="https://unpkg.com/lucide@0.344.0/dist/umd/lucide.min.js"></script>
+
+    <!-- Main stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- NAVIGATION                                                       -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <nav class="navbar" id="main-nav">
+        <div class="nav-container">
+            <a href="{{ url_for('home') }}" class="nav-brand" id="nav-brand">
+                <div class="brand-icon">
+                    <i data-lucide="scan-eye" class="brand-lucide"></i>
+                </div>
+                <span class="brand-text">Derma<strong>Vision</strong></span>
+            </a>
+
+            <div class="nav-links" id="nav-links">
+                <a href="{{ url_for('home') }}" class="nav-link {% if request.endpoint == 'home' %}active{% endif %}" id="nav-home">
+                    <i data-lucide="home"></i> Home
+                </a>
+                <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}" id="nav-dashboard">
+                    <i data-lucide="layout-dashboard"></i> Dashboard
+                </a>
+                <a href="{{ url_for('analyze') }}" class="nav-link {% if request.endpoint == 'analyze' %}active{% endif %}" id="nav-analyze">
+                    <i data-lucide="microscope"></i> Analyze
+                </a>
+                <a href="{{ url_for('history') }}" class="nav-link {% if request.endpoint == 'history' %}active{% endif %}" id="nav-history">
+                    <i data-lucide="clock-3"></i> History
+                </a>
+            </div>
+
+            <div class="nav-actions">
+                {% if session.logged_in %}
+                    <a href="{{ url_for('logout') }}" class="nav-link" id="nav-logout" style="display: inline-flex; align-items: center; margin-right: 1rem; color: var(--text-secondary); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.2s;">
+                        <i data-lucide="log-out" style="width: 18px; height: 18px; margin-right: 6px;"></i> Logout
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="nav-link" id="nav-login" style="display: inline-flex; align-items: center; margin-right: 1rem; color: var(--accent-primary); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: opacity 0.2s;">
+                        <i data-lucide="log-in" style="width: 18px; height: 18px; margin-right: 6px;"></i> Login
+                    </a>
+                {% endif %}
+                <button class="theme-toggle" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+                    <i data-lucide="moon" class="icon-dark"></i>
+                    <i data-lucide="sun" class="icon-light"></i>
+                </button>
+                <button class="mobile-toggle" id="mobile-toggle" aria-label="Toggle navigation">
+                    <i data-lucide="menu"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- FLASH MESSAGES                                                   -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-container" id="flash-container">
+        {% for category, message in messages %}
+        <div class="flash flash-{{ category }}" role="alert">
+            <div class="flash-icon">
+                {% if category == 'error' %}
+                <i data-lucide="alert-circle"></i>
+                {% elif category == 'warning' %}
+                <i data-lucide="alert-triangle"></i>
+                {% elif category == 'success' %}
+                <i data-lucide="check-circle-2"></i>
+                {% else %}
+                <i data-lucide="info"></i>
+                {% endif %}
+            </div>
+            <span class="flash-text">{{ message }}</span>
+            <button class="flash-close" onclick="this.parentElement.remove()" aria-label="Dismiss">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- MAIN CONTENT                                                     -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <main class="main-content" id="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- FOOTER                                                           -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <footer class="footer" id="footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <i data-lucide="scan-eye"></i>
+                <span>DermaVision AI</span>
+            </div>
+            <p class="footer-disclaimer">
+                <i data-lucide="alert-triangle" style="width:14px;height:14px;"></i>
+                This tool is for educational and research purposes only. It is <strong>NOT</strong> a substitute for professional medical advice, diagnosis, or treatment.
+            </p>
+            <p class="footer-copy">&copy; 2026 DermaVision AI. Built with deep learning.</p>
+        </div>
+    </footer>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- SCRIPTS                                                          -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // ── Dark mode toggle ─────────────────────────────────────────
+        const html = document.documentElement;
+        const toggle = document.getElementById('theme-toggle');
+        const saved = localStorage.getItem('theme');
+
+        if (saved) {
+            html.setAttribute('data-theme', saved);
+        } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            html.setAttribute('data-theme', 'dark');
+        }
+
+        toggle.addEventListener('click', () => {
+            const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+        });
+
+        // ── Mobile nav toggle ────────────────────────────────────────
+        const mobileBtn = document.getElementById('mobile-toggle');
+        const navLinks  = document.getElementById('nav-links');
+        mobileBtn.addEventListener('click', () => {
+            navLinks.classList.toggle('open');
+        });
+
+        // ── Auto-dismiss flash messages ──────────────────────────────
+        document.querySelectorAll('.flash').forEach(el => {
+            setTimeout(() => {
+                el.style.animation = 'slideUp .35s ease forwards';
+                setTimeout(() => el.remove(), 400);
+            }, 6000);
+        });
+
+        // ── Navbar scroll effect ─────────────────────────────────────
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('main-nav');
+            nav.classList.toggle('scrolled', window.scrollY > 20);
+        });
+    </script>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

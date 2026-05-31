@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — DermaVision AI{% endblock %}
+
+{% block extra_head %}
+<style>
+    .dashboard-page { padding: 40px 24px 80px; max-width: 1100px; margin: 0 auto; }
+    .dashboard-header { margin-bottom: 32px; }
+    .dashboard-header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 8px; }
+    .dashboard-header p { color: var(--text-secondary); }
+
+    .stats-grid { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+        gap: 24px; 
+        margin-bottom: 40px; 
+    }
+    
+    .stat-card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 24px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        transition: transform var(--transition), box-shadow var(--transition);
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+    }
+    
+    .stat-icon svg { width: 24px; height: 24px; }
+    
+    .stat-card.total .stat-icon { background: var(--info-bg); color: var(--info); }
+    .stat-card.malignant .stat-icon { background: var(--danger-bg); color: var(--danger); }
+    .stat-card.benign .stat-icon { background: var(--success-bg); color: var(--success); }
+
+    .stat-info h3 { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .stat-info p { font-size: 1.8rem; font-weight: 800; color: var(--text-primary); line-height: 1; }
+
+    .recent-section h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; }
+    
+    .history-table-wrapper {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow-x: auto;
+    }
+    
+    .history-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    .history-table th {
+        padding: 14px 18px; text-align: left; font-weight: 600;
+        color: var(--text-muted); background: var(--bg-tertiary);
+        border-bottom: 1px solid var(--border); font-size: 0.8rem;
+        text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .history-table td { padding: 14px 18px; border-bottom: 1px solid var(--border-light); vertical-align: middle; }
+    .history-table tr:last-child td { border-bottom: none; }
+    .history-table tr:hover { background: var(--bg-tertiary); }
+    
+    .risk-pill {
+        display: inline-block; padding: 4px 12px;
+        border-radius: var(--radius-full); font-size: 0.75rem;
+        font-weight: 700; text-transform: uppercase;
+    }
+    .risk-pill.benign { background: var(--success-bg); color: var(--success); }
+    .risk-pill.pre-malignant { background: var(--warning-bg); color: var(--warning); }
+    .risk-pill.malignant { background: var(--danger-bg); color: var(--danger); }
+    
+    .empty-state { text-align: center; padding: 40px 24px; color: var(--text-muted); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-page">
+    <div class="dashboard-header">
+        <h1>Patient Dashboard</h1>
+        <p>A high-level summary of all lesion analyses</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card total">
+            <div class="stat-icon"><i data-lucide="users"></i></div>
+            <div class="stat-info">
+                <h3>Total Analyses</h3>
+                <p>{{ total }}</p>
+            </div>
+        </div>
+        <div class="stat-card malignant">
+            <div class="stat-icon"><i data-lucide="alert-octagon"></i></div>
+            <div class="stat-info">
+                <h3>Malignant Cases</h3>
+                <p>{{ malignant }}</p>
+            </div>
+        </div>
+        <div class="stat-card benign">
+            <div class="stat-icon"><i data-lucide="shield-check"></i></div>
+            <div class="stat-info">
+                <h3>Benign Cases</h3>
+                <p>{{ benign }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="recent-section">
+        <h2>Recent Cases Recap</h2>
+        {% if recent_predictions %}
+        <div class="history-table-wrapper">
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>File Name</th>
+                        <th>Predicted Diagnosis</th>
+                        <th>Risk Assessment</th>
+                        <th>AI Confidence</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pred in recent_predictions %}
+                    <tr>
+                        <td>{{ pred.created_at[:16] }}</td>
+                        <td>{{ pred.original_name }}</td>
+                        <td><strong>{{ pred.diagnosis }}</strong></td>
+                        <td>
+                            <span class="risk-pill 
+                                {% if pred.risk_level == 'Benign' %}benign
+                                {% elif pred.risk_level == 'Pre-malignant' %}pre-malignant
+                                {% else %}malignant{% endif %}">
+                                {{ pred.risk_level }}
+                            </span>
+                        </td>
+                        <td>{{ pred.confidence }}%</td>
+                        <td>
+                            <a href="{{ url_for('result', prediction_id=pred.id) }}" class="btn btn-secondary btn-sm" title="View Report">
+                                <i data-lucide="arrow-right"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="history-table-wrapper">
+            <div class="empty-state">
+                <p>No patient analyses have been recorded yet.</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Result — DermaVision AI{% endblock %}
+
+{% block content %}
+<div class="result-page">
+    <div class="result-header">
+        <h1>Analysis Complete</h1>
+        <p>Review the AI-generated assessment below</p>
+    </div>
+
+    <div class="result-grid">
+        <!-- Image Card -->
+        <div class="result-image-card">
+            <img src="{{ prediction.image_url }}" alt="Uploaded Image">
+            <div class="image-info">
+                <strong>File:</strong> {{ prediction.original_name }} <br>
+                <strong>Date:</strong> {{ prediction.created_at }}
+            </div>
+        </div>
+
+        <!-- Diagnosis Card -->
+        <div class="result-diagnosis-card">
+            <span class="risk-badge" style="background: {{ risk_colors.bg }}; color: {{ risk_colors.text }}; border: 1px solid {{ risk_colors.accent }}">
+                {{ prediction.risk_level }} Risk
+            </span>
+            
+            <h2 class="diagnosis-name">{{ prediction.diagnosis }}</h2>
+            <p class="diagnosis-code">Class Code: {{ prediction.short_code }}</p>
+
+            <div class="confidence-bar-container">
+                <div class="confidence-label">
+                    <span>AI Confidence</span>
+                    <span>{{ prediction.confidence }}%</span>
+                </div>
+                <div class="confidence-track">
+                    <div class="confidence-fill" style="width: {{ prediction.confidence }}%;"></div>
+                </div>
+            </div>
+
+            {% if prediction.top_3|length > 1 %}
+            <div class="top-predictions">
+                <h4>Top Predictions</h4>
+                {% for top in prediction.top_3 %}
+                <div class="top-pred-item">
+                    <span>{{ top.name }}</span>
+                    <span class="top-pred-pct">{{ top.confidence }}%</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Explanation Card -->
+    <div class="explanation-card">
+        <h3><i data-lucide="info"></i> Medical Information</h3>
+        <p>{{ prediction.description }}</p>
+        
+        <div class="recommendation-box">
+            <strong>Next Steps:</strong> {{ prediction.recommendation }}
+        </div>
+    </div>
+
+    <div class="result-actions">
+        <a href="{{ url_for('download_pdf', prediction_id=prediction.id) }}" class="btn btn-primary">
+            <i data-lucide="download"></i> Download PDF Report
+        </a>
+        <a href="{{ url_for('analyze') }}" class="btn btn-secondary">
+            <i data-lucide="plus"></i> New Analysis
+        </a>
+    </div>
+</div>
+{% endblock %}

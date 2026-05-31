@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}History — DermaVision AI{% endblock %}
+
+{% block content %}
+<div class="history-page">
+    <h1>Analysis History</h1>
+    <p class="subtitle">A complete log of all past skin lesion predictions</p>
+
+    {% if predictions %}
+    <div class="history-table-wrapper">
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Image</th>
+                    <th>Diagnosis</th>
+                    <th>Risk Level</th>
+                    <th>Confidence</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pred in predictions %}
+                <tr>
+                    <td>{{ pred.created_at[:16] }}</td>
+                    <td>{{ pred.original_name }}</td>
+                    <td><strong>{{ pred.diagnosis }}</strong> <br><span style="color:var(--text-muted);font-size:0.8rem;">({{ pred.short_code }})</span></td>
+                    <td>
+                        <span class="risk-pill 
+                            {% if pred.risk_level == 'Benign' %}benign
+                            {% elif pred.risk_level == 'Pre-malignant' %}pre-malignant
+                            {% else %}malignant{% endif %}">
+                            {{ pred.risk_level }}
+                        </span>
+                    </td>
+                    <td>{{ pred.confidence }}%</td>
+                    <td>
+                        <div style="display:flex; gap:8px;">
+                            <a href="{{ url_for('result', prediction_id=pred.id) }}" class="btn btn-secondary btn-sm" title="View Details">
+                                <i data-lucide="eye"></i>
+                            </a>
+                            <a href="{{ url_for('download_pdf', prediction_id=pred.id) }}" class="btn btn-secondary btn-sm" title="Download PDF">
+                                <i data-lucide="download"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i data-lucide="inbox"></i>
+        <h3>No analysis history found</h3>
+        <p>You haven't uploaded any images yet. Start by analyzing a lesion.</p>
+        <a href="{{ url_for('analyze') }}" class="btn btn-primary" style="margin-top:16px;">
+            <i data-lucide="microscope"></i> Analyze Image
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

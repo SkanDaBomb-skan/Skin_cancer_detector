@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Login — DermaVision AI{% endblock %}
+
+{% block content %}
+<div class="login-wrapper" style="display: flex; justify-content: center; align-items: center; min-height: calc(100vh - 200px); padding: 2rem;">
+    <div class="login-container" style="background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 3rem; width: 100%; max-width: 480px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05); text-align: center;">
+        
+        <div class="login-icon" style="display: inline-flex; justify-content: center; align-items: center; width: 64px; height: 64px; background: rgba(37, 99, 235, 0.1); color: var(--accent-primary); border-radius: 16px; margin-bottom: 1.5rem;">
+            <i data-lucide="shield-check" style="width: 32px; height: 32px;"></i>
+        </div>
+        
+        <h1 style="font-size: 2rem; color: var(--text-primary); margin-bottom: 0.5rem; font-weight: 700;">Welcome Back</h1>
+        <p style="color: var(--text-secondary); margin-bottom: 2.5rem;">Please log in to access your clinical dashboard and perform analyses.</p>
+
+        <form method="POST" action="{{ url_for('login', next=request.args.get('next', '')) }}" style="text-align: left;">
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label for="username" style="display: block; font-weight: 500; margin-bottom: 0.5rem; color: var(--text-primary);">Username</label>
+                <div class="input-with-icon" style="position: relative;">
+                    <i data-lucide="user" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-tertiary); width: 20px; height: 20px;"></i>
+                    <input type="text" id="username" name="username" placeholder="Enter your username" required
+                        style="width: 100%; padding: 0.875rem 1rem 0.875rem 3rem; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); color: var(--text-primary); font-size: 1rem; font-family: inherit; transition: all 0.2s;">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 2.5rem;">
+                <label for="password" style="display: block; font-weight: 500; margin-bottom: 0.5rem; color: var(--text-primary);">Password</label>
+                <div class="input-with-icon" style="position: relative;">
+                    <i data-lucide="lock" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-tertiary); width: 20px; height: 20px;"></i>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required
+                        style="width: 100%; padding: 0.875rem 1rem 0.875rem 3rem; border: 1px solid var(--border); border-radius: 12px; background: var(--bg); color: var(--text-primary); font-size: 1rem; font-family: inherit; transition: all 0.2s;">
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.05rem; justify-content: center; display: flex; align-items: center; gap: 0.5rem;">
+                <i data-lucide="log-in" style="width: 20px; height: 20px;"></i> Log In to Dashboard
+            </button>
+        </form>
+        
+        <div class="login-footer" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border); color: var(--text-tertiary); font-size: 0.875rem;">
+            <p>Secure Medical Portal • Authorized Personnel Only</p>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Add focus states to the inputs */
+    input:focus {
+        outline: none;
+        border-color: var(--accent-primary) !important;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+</style>
+{% endblock %}
